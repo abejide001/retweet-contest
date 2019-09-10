@@ -4,13 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"strings"
 
 	"golang.org/x/oauth2"
 )
+
+// RetweetResponse struct
+type RetweetResponse struct {
+	User struct {
+		ScreenName string `json:"screen_name"`
+	} `json:"user"`
+}
 
 func main() {
 	var keys struct {
@@ -46,10 +52,29 @@ func main() {
 	}
 	var conf oauth2.Config
 	TwitterClient := conf.Client(context.Background(), &token)
-	response, err := TwitterClient.Get("https://api.twitter.com/1.1/statuses/retweets/1171044354359726082.json")
+	usernames, err := retweeters(TwitterClient, "1171044354359726082")
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println(usernames)
+}
+
+func retweeters(client *http.Client, tweetID string) ([]string, error) {
+	url := fmt.Sprintf("https://api.twitter.com/1.1/statuses/retweets/%s.json", tweetID)
+	response, err := client.Get(url)
+	if err != nil {
+		return nil, err
+	}
 	defer response.Body.Close()
-	io.Copy(os.Stdout, response.Body)
+	var retweets []RetweetResponse
+	dec := json.NewDecoder(response.Body)
+	err = dec.Decode(&retweets)
+	if err != nil {
+		return nil, err
+	}
+	var usernames []string
+	for _, retweet := range retweets {
+		usernames = append(usernames, retweet.User.ScreenName)
+	}
+	return usernames, nil
 }
