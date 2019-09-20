@@ -24,7 +24,7 @@ func main() {
 	var keyFile, usersFile, tweetID string
 	flag.StringVar(&keyFile, "key", "keys.json", "the file where you store consumer key and secret")
 	flag.StringVar(&usersFile, "users", ".users.csv", "the file where users who retweeted the tweet are stored")
-	flag.StringVar(&tweetID, "tweet", "1170336106354806784", "the id of the tweet")
+	flag.StringVar(&tweetID, "tweet", "1171681896511758336", "the id of the tweet")
 	flag.Parse()
 	key, secret, err := keys(keyFile)
 	if err != nil {
